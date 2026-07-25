@@ -24,9 +24,7 @@ DB_USER = env_config("DB_USER")
 DB_PASS = env_config("DB_PASS")
 DB_NAME = env_config("DB_NAME")
 DB_PORT = env_config("DB_PORT", cast=int)
-
 DATABASE_URL = f'mysql+aiomysql://{DB_USER}:{DB_PASS}@localhost:{DB_PORT}/{DB_NAME}'
-
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 # add your model's MetaData object here
 # for 'autogenerate' support
