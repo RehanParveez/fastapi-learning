@@ -25,3 +25,17 @@ class Token(BaseModel):
 class TokenData(BaseModel):
   email: Optional[EmailStr] = None
   role: Optional[str] = None
+  
+class TaskCreate(BaseModel):
+  title: str
+  description: Optional[str] = None
+
+class TaskRead(BaseModel):
+  id: int
+  title: str
+  description: Optional[str] = None
+  owner_id: int
+  is_completed: bool
+
+  class Config:
+    from_attributes = True
