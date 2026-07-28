@@ -6,7 +6,7 @@ def get_user_by_email(db: Session, email: str):
   return db.query(User).filter(User.email == email).first()
 
 def create_user(db: Session, username: str, email: str, password: str, role: str ="user"):
-  db_user =  User(username=username, email=email, hash_password=hash_password(password),
+  db_user =  User(username=username, email=email, hashed_password=hash_password(password),
     role=role, is_active=True)
   db.add(db_user)
   db.commit()
