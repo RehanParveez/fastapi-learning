@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import Optional
 
 class UserCreate(BaseModel):
@@ -39,3 +39,23 @@ class TaskRead(BaseModel):
 
   class Config:
     from_attributes = True
+    
+class NoteCreate(BaseModel):
+  title: str
+  description: Optional[str] = ""
+  
+class NoteRead(BaseModel):
+  id: int
+  title: str
+  description: Optional[str]
+  owner_id: int
+  
+  model_config = ConfigDict(from_attributes=True)
+  
+class AttachmentRead(BaseModel):
+  id: int
+  filename: str
+  file_path: str
+  note_id: int
+  
+  model_config = ConfigDict(from_attributes=True)

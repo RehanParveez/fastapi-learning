@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text
 from app.db.base import Base
 
 class User(Base):
@@ -20,3 +19,19 @@ class Task(Base):
   description = Column(String, nullable=True)
   is_completed = Column(Boolean, default=False)
   owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+  
+class Note(Base):
+  __tablename__ = "notes"
+    
+  id = Column(Integer, primary_key=True, index=True)
+  title = Column(String, nullable=False)
+  description = Column(Text, nullable=True)
+  owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+class Attachment(Base):
+  __tablename__ = "attachments"
+    
+  id = Column(Integer, primary_key=True, index=True)
+  filename = Column(String, nullable=False)
+  file_path = Column(String, nullable=False)
+  note_id = Column(Integer, ForeignKey("notes.id"), nullable=False)
