@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
-from typing import Optional
+from typing import Optional, List, TypeVar, Generic
 
 class UserCreate(BaseModel):
   username: str
@@ -17,6 +17,8 @@ class UserRead(BaseModel):
   email: EmailStr
   role: str
   is_active: bool
+  
+  model_config = ConfigDict(from_attributes=True)
   
 class Token(BaseModel):
   access_token: str
@@ -59,3 +61,12 @@ class AttachmentRead(BaseModel):
   note_id: int
   
   model_config = ConfigDict(from_attributes=True)
+  
+T = TypeVar("T")
+
+class PaginatedResponse(BaseModel, Generic[T]):
+  items: List[T]
+  total: int
+  skip: int
+  limit: int
+  has_more: bool

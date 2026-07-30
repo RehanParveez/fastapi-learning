@@ -3,11 +3,11 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 import shutil
 from pathlib import Path
-from app.schemas import NoteRead, TokenData
+from app.schemas import NoteRead, PaginatedResponse
 from app.deps import get_current_user, get_db, PaginationParams
 from app.db import crud
 from app.background import write_log
-from app.models import Attachment, Note
+from app.models import Attachment, Note, User
 from fastapi.responses import FileResponse
 
 router = APIRouter(prefix="/notes", tags=["notes"])
@@ -17,7 +17,7 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 
 @router.post ("/", response_model=NoteRead, status_code=status.HTTP_201_CREATED)
 def create_note_with_file(title: str = Form(...), description: Optional[str] = Form(""), 
-  file: UploadFile = File(...), db: Session = Depends(get_db), current_user: TokenData = Depends(get_current_user)
+  file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     
   MAX_SIZE = 5 * 1024 * 1024
@@ -32,42 +32,36 @@ def create_note_with_file(title: str = Form(...), description: Optional[str] = F
   if ext not in allowed_extensions:
     raise HTTPException(status_code=400, detail=f"File type {ext} not allowed") 
   
-  db_user = crud.get_user_by_email(db, current_user.email)
-  db_note = crud.create_note(db, title=title, description=description, owner_id=db_user.id)
+  db_note = crud.create_note(db, title=title, description=description, owner_id=current_user.id)
   
-  safe_filename = f"{db_user.id}_{file.filename}"
+  safe_filename = f"{current_user.id}_{file.filename}"
   file_path = UPLOAD_DIR / safe_filename
   
   with open(file_path, "wb") as buffer:
     shutil.copyfileobj(file.file, buffer)
     
-  db_attachment = crud.create_attachment(db, filename=file.filename, file_path=str(file_path), note_id=db_note.id)
-  write_log(f"User {db_user.email} uploaded {file.filename} to note {db_note.id}")
-    
+  crud.create_attachment(db, filename=file.filename, file_path=str(file_path), note_id=db_note.id)
+  write_log(f"User {current_user.email} uploaded {file.filename} to note {db_note.id}")
   return db_note
 
-@router.get("/", response_model=List[NoteRead])
-def read_my_notes(
-  pagination: PaginationParams = Depends(),
-  db: Session = Depends(get_db),
-  current_user: TokenData = Depends(get_current_user)):
+@router.get("/", response_model=PaginatedResponse[NoteRead])
+def read_my_notes(pagination: PaginationParams = Depends(), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+):
+  query = db.query(Note).filter(Note.owner_id == current_user.id)  
+  total = query.count()
+  notes = query.offset(pagination.skip).limit(pagination.limit).all()
     
-  db_user = crud.get_user_by_email(db, current_user.email)
-  notes = db.query(Note).filter(Note.owner_id == db_user.id)\
-    .offset(pagination.skip)\
-    .limit(pagination.limit)\
-    .all()
-  return notes
+  return PaginatedResponse(items=notes, total=total, skip=pagination.skip, limit=pagination.limit,
+    has_more=(pagination.skip + len(notes)) < total)
 
 @router.get("/{note_id}/download")
-def download_note_attachment(note_id: int, db: Session = Depends(get_db), current_user: TokenData = Depends(get_current_user)):
+def download_note_attachment(note_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+):
   attachment = db.query(Attachment).filter(Attachment.note_id == note_id).first()
   if not attachment:
-    raise HTTPException(status_code=404, detail = "file is not pres.")
-    
+    raise HTTPException(status_code=404, detail="File is not present.")
   note = db.query(Note).filter(Note.id == note_id).first()
-  db_user = crud.get_user_by_email(db, current_user.email)
-  if note.owner_id != db_user.id and current_user.role != "admin":
-    raise HTTPException(status_code=403, detail = "not your file")
-    
+  if note.owner_id != current_user.id and current_user.role != "admin":
+    raise HTTPException(status_code=403, detail="Not your file")
+
   return FileResponse(attachment.file_path)

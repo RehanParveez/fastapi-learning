@@ -3,8 +3,10 @@ from app.db.session import SessionLocal
 from fastapi import Depends, HTTPException, status, Request
 import time
 from app.auth import decode_access_token
-from app.schemas import TokenData
 from collections import defaultdict
+from sqlalchemy.orm import Session
+from app.db import crud
+from app.models import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl = "/auth/login")
 
@@ -15,21 +17,27 @@ def get_db():
   finally:
     db.close()
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
   credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail = "cant validate credentials",
     headers={"WWW-Authenticate": "Bearer"})
 
   try:
     payload = decode_access_token(token)
     email = payload.get("sub")
-    role = payload.get("role")
     if email is None:
       raise credentials_exception
-    return TokenData(email=email, role=role)
   except Exception:
-      raise credentials_exception
+    raise credentials_exception
+    
+  user = crud.get_user_by_email(db, email=email)
+  if user is None:
+    raise credentials_exception
+  if not user.is_active:
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail = "inactive user")
+  
+  return user
 
-def get_current_admin(current_user = Depends(get_current_user)):
+def get_current_admin(current_user: User = Depends(get_current_user)):
   if current_user.role != "admin":
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail = 'Admin only')
   return current_user
