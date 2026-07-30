@@ -4,7 +4,7 @@ from typing import Optional, List
 import shutil
 from pathlib import Path
 from app.schemas import NoteRead, TokenData
-from app.deps import get_current_user, get_db
+from app.deps import get_current_user, get_db, PaginationParams
 from app.db import crud
 from app.background import write_log
 from app.models import Attachment, Note
@@ -48,12 +48,16 @@ def create_note_with_file(title: str = Form(...), description: Optional[str] = F
 
 @router.get("/", response_model=List[NoteRead])
 def read_my_notes(
+  pagination: PaginationParams = Depends(),
   db: Session = Depends(get_db),
   current_user: TokenData = Depends(get_current_user)):
     
-    db_user = crud.get_user_by_email(db, current_user.email)
-    notes = db.query(Note).filter(Note.owner_id == db_user.id).all()
-    return notes
+  db_user = crud.get_user_by_email(db, current_user.email)
+  notes = db.query(Note).filter(Note.owner_id == db_user.id)\
+    .offset(pagination.skip)\
+    .limit(pagination.limit)\
+    .all()
+  return notes
 
 @router.get("/{note_id}/download")
 def download_note_attachment(note_id: int, db: Session = Depends(get_db), current_user: TokenData = Depends(get_current_user)):

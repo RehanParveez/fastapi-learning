@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from app.schemas import TaskRead, TaskCreate, TokenData
-from app.deps import get_current_user, get_db
+from app.deps import get_current_user, get_db, PaginationParams
 from app.db import crud
 from app.background import write_log, notify_task_created 
 from typing import List
+from app.models import Task
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -19,9 +20,13 @@ def create_task(task: TaskCreate, background_tasks: BackgroundTasks, db: Session
   return db_task 
 
 @router.get("/", response_model=List[TaskRead])
-def read_my_tasks(db: Session = Depends(get_db),
+def read_my_tasks(pagination: PaginationParams = Depends(),
+  db: Session = Depends(get_db),
   current_user: TokenData = Depends(get_current_user)
 ):
   db_user = crud.get_user_by_email(db, current_user.email)
-  tasks = crud.get_tasks_by_owner(db, owner_id=db_user.id)
+  tasks = db.query(Task).filter(Task.owner_id == db_user.id)\
+    .offset(pagination.skip)\
+    .limit(pagination.limit)\
+    .all()
   return tasks

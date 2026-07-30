@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.schemas import UserRead, UserCreate, Token
 from app.security import verify_password
 from app.auth import create_access_token
-from app.deps import get_db
+from app.deps import get_db, login_rate_limiter
 from app.db import crud
 from app.background import send_welcome_email, notify_admin_new_user
 
@@ -23,7 +23,8 @@ def register(user: UserCreate, background_tasks: BackgroundTasks, db: Session = 
 @router.post("/login", response_model=Token)
 def login(
    form_data: OAuth2PasswordRequestForm = Depends(), 
-   db: Session = Depends(get_db)
+   db: Session = Depends(get_db),
+   _: None = Depends(login_rate_limiter) 
 ):
   db_user = crud.get_user_by_email(db, form_data.username)
   if not db_user or not verify_password(form_data.password, db_user.hashed_password):

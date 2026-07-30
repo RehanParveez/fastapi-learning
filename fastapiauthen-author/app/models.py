@@ -10,6 +10,7 @@ class User(Base):
   hashed_password = Column(String, default = "user")
   role = Column(String, default = "user")
   is_active = Column(Boolean, default=True)
+  created_at = Column(String, nullable=True)
   
 class Task(Base):
   __tablename__ = "tasks"
