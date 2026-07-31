@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, status
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
-from typing import Optional, List
+from typing import Optional
 import shutil
 from pathlib import Path
 from app.schemas import NoteRead, PaginatedResponse
-from app.deps import get_current_user, get_db, PaginationParams
+from app.deps import get_current_user, get_db, PaginationParams, user_rate_limiter
 from app.db import crud
 from app.background import write_log
 from app.models import Attachment, Note, User
 from fastapi.responses import FileResponse
+from app.background import notify_note_uploaded
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 
@@ -16,8 +17,9 @@ UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 @router.post ("/", response_model=NoteRead, status_code=status.HTTP_201_CREATED)
-def create_note_with_file(title: str = Form(...), description: Optional[str] = Form(""), 
-  file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+def create_note_with_file(background_tasks: BackgroundTasks, title: str = Form(...), description: Optional[str] = Form(""), 
+  file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+  _: None = Depends(user_rate_limiter)
 ):
     
   MAX_SIZE = 5 * 1024 * 1024
@@ -42,6 +44,13 @@ def create_note_with_file(title: str = Form(...), description: Optional[str] = F
     
   crud.create_attachment(db, filename=file.filename, file_path=str(file_path), note_id=db_note.id)
   write_log(f"User {current_user.email} uploaded {file.filename} to note {db_note.id}")
+  
+  background_tasks.add_task(notify_note_uploaded, email=current_user.email, filename=file.filename,
+    note_id=db_note.id, user_id=current_user.id)
+  
+  import asyncio
+  asyncio.create_task(notify_note_uploaded(email=current_user.email, filename=file.filename, note_id=db_note.id, user_id=current_user.id))
+
   return db_note
 
 @router.get("/", response_model=PaginatedResponse[NoteRead])
@@ -50,7 +59,6 @@ def read_my_notes(pagination: PaginationParams = Depends(), db: Session = Depend
   query = db.query(Note).filter(Note.owner_id == current_user.id)  
   total = query.count()
   notes = query.offset(pagination.skip).limit(pagination.limit).all()
-    
   return PaginatedResponse(items=notes, total=total, skip=pagination.skip, limit=pagination.limit,
     has_more=(pagination.skip + len(notes)) < total)
 

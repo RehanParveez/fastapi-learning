@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from app.routers import auth, users, tasks, notes
 from app.middleware.logging import LoggingMiddleware, SecurityHeadersMiddleware
 from fastapi.middleware.cors import CORSMiddleware
+from app.websocket.router import router as ws_router
 
 app = FastAPI()
 app.add_middleware(LoggingMiddleware)
@@ -12,3 +13,4 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(tasks.router)
 app.include_router(notes.router)
+app.include_router(ws_router)
