@@ -14,6 +14,7 @@ class RecordEntryType(str, enum.Enum):
   advance_repayment = "advance_repayment"
   broker_commission = "broker_commission"
   net_payment = "net_payment"
+  contract_payment = "contract_payment" 
   
 class RecordEntry(Base):
   __tablename__ = "record_entries"
