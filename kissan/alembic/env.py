@@ -15,6 +15,8 @@ from app.db.session import Base
 from app.models.user import User, FarmerProfile, ShopkeeperProfile, BrokerProfile, FactoryProfile
 from app.models.verification import VerificationDocument
 from app.models.input import InputProduct
+from app.models.advance import CropAdvance
+from app.models.record import RecordEntry
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
