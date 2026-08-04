@@ -3,8 +3,9 @@ from app.models.user import User, UserRole
 from app.schemas.listing import CropListingCreate, ConsumerOrderCreate
 from app.models.listing import CropListing, ListingStatus, ConsumerPaymentMode
 from fastapi import HTTPException, status
-from app.repositories import listing_repository, user_repository, record_repository
+from app.repositories import listing_repository, user_repository, record_repository, contract_repository
 from app.models.record import RecordEntryType, RecordDirection
+from app.models.contract import SourceType, QualityGrade
 
 def create_listing(db: Session, current_user: User, listing_in: CropListingCreate) -> CropListing:
   if current_user.role == UserRole.farmer:
@@ -27,7 +28,7 @@ def create_listing(db: Session, current_user: User, listing_in: CropListingCreat
     quantity=listing_in.quantity, quality_grade=listing_in.quality_grade, price=listing_in.price, retail_available=listing_in.retail_available, 
     retail_unit_size=listing_in.retail_unit_size)
 
-def _apply_sale(db: Session, listing: CropListing, qty: float) -> float:
+def _apply_sale(db: Session, listing: CropListing, qty: float, recorded_by: int) -> float:
   if listing.status != ListingStatus.active:
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail = f"this listing is '{listing.status.value}' and not available for purchase")
   if qty <= 0:
@@ -42,6 +43,10 @@ def _apply_sale(db: Session, listing: CropListing, qty: float) -> float:
 
   record_repository.add_entry(db, farmer_id=listing.farmer_id, entry_type=RecordEntryType.crop_sale,
     direction=RecordDirection.credit, amount=amount, reference_type = "crop_listing", reference_id=listing.id)
+  
+  contract_repository.create_delivery(db, source_type=SourceType.listing, source_id=listing.id, delivered_qty=qty,
+    quality_grade=QualityGrade(listing.quality_grade.value), price_adjustment_percent=0.0, recorded_by=recorded_by,
+  )
   db.flush()
   return amount
 
@@ -68,9 +73,9 @@ def place_consumer_order(db: Session, consumer: User, order_in: ConsumerOrderCre
       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail = f"Listing {listing.id} is not available for retail purchase")
 
     unit_price = listing.price
-    subtotal = _apply_sale(db, listing, item_in.qty)
+    subtotal = _apply_sale(db, listing, item_in.qty, consumer.id)
     listing_repository.add_order_item(db, order_id=order.id, listing_id=listing.id, qty=item_in.qty, unit_price=unit_price)
     total += subtotal
 
   order.total_amount = round(total, 2)
-  return listing_repository.save_order(db, order) 
+  return listing_repository.save_order(db, order)

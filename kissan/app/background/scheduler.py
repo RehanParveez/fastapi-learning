@@ -5,7 +5,7 @@ from app.db.session import SessionLocal
 from app.models.advance import CropAdvance, AdvanceStatus
 from app.models.contract import ContractDemand, ContractDemandStatus
 from app.repositories import contract_repository
-from app.websocket.manager import manager
+from app.notifications.service import notify_user
 
 logger = logging.getLogger("kisanlink.scheduler")
 scheduler = BackgroundScheduler()
@@ -22,8 +22,8 @@ def check_overdue_advances():
      )
     for advance in overdue:
       logger.warning(f"CropAdvance {advance.id} is overdue (due {advance.due_date})")
-      manager.notify(advance.farmer_id, "advance_overdue", {"advance_id": advance.id})
-      manager.notify(advance.broker_id, "advance_overdue", {"advance_id": advance.id, "farmer_id": advance.farmer_id})
+      notify_user.notify(advance.farmer_id, "advance_overdue", {"advance_id": advance.id})
+      notify_user.notify(advance.broker_id, "advance_overdue", {"advance_id": advance.id, "farmer_id": advance.farmer_id})
   finally:
     db.close()
 
