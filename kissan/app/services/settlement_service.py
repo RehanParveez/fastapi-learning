@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
-from app.repositories import record_repository, advance_repository
+from app.repositories import record_repository, advance_repository, input_order_repository
 from app.models.record import RecordDirection, RecordEntryType
 from app.models.user import User
 from fastapi import HTTPException, status
 from app.models.advance import AdvanceType, AdvanceStatus
+from app.models.input_order import InputOrderStatus
 
 def farmer_balance(db: Session, farmer_id: int) -> float:
   entries = record_repository.list_entries(db, farmer_id)
@@ -34,14 +35,24 @@ def settle_consignment_sale(db: Session, broker: User, advance_id: int, sale_amo
 
   principal_take = min(remaining, advance.outstanding_balance)
   record_repository.add_entry(db, farmer_id=advance.farmer_id, entry_type=RecordEntryType.advance_repayment,
-    direction=RecordDirection.debit, amount=principal_take, reference_type = "crop_advance", reference_id=advance.id)
+      direction=RecordDirection.debit, amount=principal_take, reference_type = "crop_advance", reference_id=advance.id)
   advance.outstanding_balance -= principal_take
   remaining -= principal_take
-
   advance.status = AdvanceStatus.settled if advance.outstanding_balance <= 0 else AdvanceStatus.repaying
 
-  record_repository.add_entry(db, farmer_id=advance.farmer_id, entry_type=RecordEntryType.net_payment,
-    direction=RecordDirection.credit, amount=remaining, reference_type = "crop_advance", reference_id=advance.id)
+  for credit in input_order_repository.open_input_credits(db, advance.farmer_id):
+    take = min(remaining, credit.outstanding_balance)
+    if take <= 0:
+      continue
+    record_repository.add_entry(db, farmer_id=advance.farmer_id, entry_type=RecordEntryType.credit_repayment,
+      direction=RecordDirection.debit, amount=take, reference_type = "input_order", reference_id=credit.id)
+    credit.outstanding_balance -= take
+    if credit.outstanding_balance == 0:
+      credit.status = InputOrderStatus.settled
+    remaining -= take
+
+  record_repository.add_entry(db, farmer_id=advance.farmer_id, entry_type=RecordEntryType.net_payment, direction=RecordDirection.credit, 
+    amount=remaining, reference_type = "crop_advance", reference_id=advance.id)
   advance_repository.save(db, advance)
 
   return {"commission": commission, "advance_repaid": principal_take, "net_to_farmer": remaining, "advance_status": advance.status}

@@ -89,7 +89,7 @@ def record_delivery(db: Session, factory: User, allocation_id: int, delivery_in:
     recorded_by=factory.id)
 
   record_repository.add_entry(db, farmer_id=allocation.farmer_id, entry_type = RecordEntryType.contract_payment,
-    direction=ResourceWarningDirection.credit, amount=payment_amount,
+    direction=RecordDirection.credit, amount=payment_amount,
     reference_type="delivery", reference_id=delivery.id)
 
   allocation.status = AllocationStatus.delivered

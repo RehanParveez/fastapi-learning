@@ -18,6 +18,9 @@ from app.models.input import InputProduct
 from app.models.advance import CropAdvance
 from app.models.record import RecordEntry
 from app.models.contract import ContractDemand, ContractAllocation, Delivery
+from app.models.listing import CropListing, ConsumerOrder, ConsumerOrderItem
+from app.models.rating import Rating
+from app.models.input_order import InputOrder, InputOrderItem
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
