@@ -44,7 +44,7 @@ def place_order(db: Session, farmer: User, order_in: InputOrderCreate):
 
   if order_in.payment_mode == InputPaymentMode.credit:
     order.outstanding_balance = round(total * (1 + order_in.credit_markup_percent), 2)
-    record_repository.add_entry(db, farmer_id=farmer.id, entry_type=RecordEntryType.input_credit, direction=RecordDirection.debit, amount=order.outstanding_balance,
+    record_repository.add_entry(db, farmer_id=farmer.id, entry_type=RecordEntryType.input_credit, direction=RecordDirection.credit, amount=order.total_amount,
       reference_type="input_order", reference_id=order.id)
   else:
     order.status = InputOrderStatus.settled   

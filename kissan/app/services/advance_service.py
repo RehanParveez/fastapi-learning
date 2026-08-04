@@ -4,8 +4,8 @@ from app.models.user import User
 from fastapi import HTTPException, status
 from app.models.advance import AdvanceStatus, AdvanceType
 from app.models.record import RecordEntryType, RecordDirection
-from app.repositories import advance_repository
-from app.repositories import record_repository
+from app.repositories import advance_repository, record_repository
+from app.websocket.manager import manager
 
 def _validate_offer(offer_in: CropAdvanceOffer) -> None:
   if offer_in.advance_type == AdvanceType.crop_consignment:
@@ -54,4 +54,6 @@ def disburse_advance(db: Session, broker: User, advance_id: int):
   record_repository.add_entry(db, farmer_id=advance.farmer_id, entry_type=RecordEntryType.crop_advance,
     direction=RecordDirection.credit, amount=advance.advance_amount, reference_type = "crop_advance", reference_id=advance.id)
 
-  return advance_repository.save(db, advance)
+  result = advance_repository.save(db, advance)
+  manager.notify(advance.farmer_id, "advance_disbursed", {"advance_id": advance.id, "amount": advance.advance_amount})
+  return result
