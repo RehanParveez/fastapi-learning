@@ -1,10 +1,17 @@
 import { useState } from 'react'
+import { Routes, Route, Link } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import './App.css'
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import Dashboard from "./pages/Dashboard";
+import Layout from "./components/Layout";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
-function App() {
+function LandingPage() {
   const [count, setCount] = useState(0)
 
   return (
@@ -28,6 +35,16 @@ function App() {
         >
           Count is {count}
         </button>
+        
+        {/* ADD THIS: Entry points to your actual app */}
+        <div style={{ marginTop: "20px", display: "flex", gap: "12px", justifyContent: "center" }}>
+          <Link to="/login" style={{ padding: "8px 16px", background: "#15803d", color: "white", borderRadius: "6px", textDecoration: "none" }}>
+            Login
+          </Link>
+          <Link to="/register" style={{ padding: "8px 16px", background: "#374151", color: "white", borderRadius: "6px", textDecoration: "none" }}>
+            Register
+          </Link>
+        </div>
       </section>
 
       <div className="ticks"></div>
@@ -63,11 +80,7 @@ function App() {
           <ul>
             <li>
               <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
+                <svg className="button-icon" role="presentation" aria-hidden="true">
                   <use href="/icons.svg#github-icon"></use>
                 </svg>
                 GitHub
@@ -75,11 +88,7 @@ function App() {
             </li>
             <li>
               <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
+                <svg className="button-icon" role="presentation" aria-hidden="true">
                   <use href="/icons.svg#discord-icon"></use>
                 </svg>
                 Discord
@@ -87,11 +96,7 @@ function App() {
             </li>
             <li>
               <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
+                <svg className="button-icon" role="presentation" aria-hidden="true">
                   <use href="/icons.svg#x-icon"></use>
                 </svg>
                 X.com
@@ -99,11 +104,7 @@ function App() {
             </li>
             <li>
               <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
+                <svg className="button-icon" role="presentation" aria-hidden="true">
                   <use href="/icons.svg#bluesky-icon"></use>
                 </svg>
                 Bluesky
@@ -116,6 +117,23 @@ function App() {
       <div className="ticks"></div>
       <section id="spacer"></section>
     </>
+  )
+}
+
+function App() {
+  return (
+    <Routes>
+      {/* Public routes */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      
+      {/* Protected routes with navbar layout */}
+      <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        {/* More protected pages will go here */}
+      </Route>
+    </Routes>
   )
 }
 
