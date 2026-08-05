@@ -6,6 +6,7 @@ from app.core.security import hash_password, verify_password, create_access_toke
 from app.routers import auth, profiles, verification, inputs,  input_orders, advances, record, contracts, listings, ratings, websocket as ws_router, admin
 from app.notifications.service import notify_user
 from app.background.scheduler import start_scheduler, shutdown_scheduler
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -15,6 +16,10 @@ async def lifespan(app: FastAPI):
   shutdown_scheduler()
 
 app = FastAPI(title = "Kisan API")
+
+app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5180"], allow_credentials=True, allow_methods=["*"],
+  allow_headers=["*"],
+)
 
 app.include_router(auth.router)
 app.include_router(profiles.router)
