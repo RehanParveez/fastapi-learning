@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import { useAuth } from "./context/AuthContext";
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
@@ -8,8 +9,12 @@ import './App.css'
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import Dashboard from "./pages/Dashboard";
+import ProfileCreatePage from "./pages/ProfileCreatePage";
+import InputCatalogPage from "./pages/InputCatalogPage";
+import InputOrdersPage from "./pages/InputOrdersPage";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import RoleRoute from "./routes/RoleRoute";
 
 function LandingPage() {
   const [count, setCount] = useState(0)
@@ -36,7 +41,6 @@ function LandingPage() {
           Count is {count}
         </button>
         
-        {/* ADD THIS: Entry points to your actual app */}
         <div style={{ marginTop: "20px", display: "flex", gap: "12px", justifyContent: "center" }}>
           <Link to="/login" style={{ padding: "8px 16px", background: "#15803d", color: "white", borderRadius: "6px", textDecoration: "none" }}>
             Login
@@ -121,19 +125,22 @@ function LandingPage() {
 }
 
 function App() {
+  const location = useLocation();
   return (
-    <Routes>
-      {/* Public routes */}
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       
-      {/* Protected routes with navbar layout */}
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route path="/dashboard" element={<Dashboard />} />
-        {/* More protected pages will go here */}
+        <Route path="/profile/create" element={<ProfileCreatePage />} />
+        <Route path="/input-catalog" element={<RoleRoute allowedRoles={["shopkeeper"]}><InputCatalogPage /></RoleRoute>} />
+        <Route path="/input-orders" element={<RoleRoute allowedRoles={["farmer", "shopkeeper"]}><InputOrdersPage /></RoleRoute>} />
       </Route>
-    </Routes>
+      </Routes>
+    </AnimatePresence>
   )
 }
 
