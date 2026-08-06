@@ -11,6 +11,12 @@ class UserRole(str, enum.Enum):
   factory = "factory"
   consumer = "consumer"
   admin = "admin"
+  
+class Gender(str, enum.Enum):
+  male = "male"
+  female = "female"
+  other = "other"
+  prefer_not_to_say = "prefer_not_to_say"
 
 class User(Base):
   __tablename__ = "users"
@@ -18,9 +24,13 @@ class User(Base):
   id = Column(Integer, primary_key=True, index=True)
   phone = Column(String, unique=True, index=True, nullable=False)
   email = Column(String, unique=True, index=True, nullable=True)
+  username = Column(String, unique=True, index=True, nullable=True)
   hashed_password = Column(String, nullable=False)
+  gender = Column(Enum(Gender), nullable=True)
   role = Column(Enum(UserRole), nullable=False)
   is_active = Column(Boolean, default=True, nullable=False)
+  reset_token = Column(String, unique=True, index=True, nullable=True)
+  reset_token_expires = Column(DateTime(timezone=True), nullable=True)
   created_at = Column(DateTime(timezone=True), server_default=func.now())
 
   farmer_profile = relationship("FarmerProfile", back_populates = "user", uselist=False, cascade = "all, delete-orphan")
@@ -36,7 +46,6 @@ class FarmerProfile(Base):
   land_size_acres = Column(Float, nullable=True)
   location = Column(String, nullable=True)
   verified = Column(Boolean, default=False, nullable=False)
-
   user = relationship("User", back_populates = "farmer_profile")
 
 class ShopkeeperProfile(Base):
@@ -47,7 +56,6 @@ class ShopkeeperProfile(Base):
   business_name = Column(String, nullable=False)
   location = Column(String, nullable=True)
   verified = Column(Boolean, default=False, nullable=False)
-
   user = relationship("User", back_populates = "shopkeeper_profile")
 
 class BrokerProfile(Base):
@@ -58,7 +66,6 @@ class BrokerProfile(Base):
   business_name = Column(String, nullable=False)
   location = Column(String, nullable=True)
   verified = Column(Boolean, default=False, nullable=False)
-
   user = relationship("User", back_populates = "broker_profile")
 
 class FactoryProfile(Base):
@@ -69,5 +76,4 @@ class FactoryProfile(Base):
   business_name = Column(String, nullable=False)
   location = Column(String, nullable=True)
   verified = Column(Boolean, default=False, nullable=False)
-
   user = relationship("User", back_populates = "factory_profile")

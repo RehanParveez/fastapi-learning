@@ -1,10 +1,12 @@
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 from datetime import datetime
-from app.models.user import UserRole
+from app.models.user import UserRole, Gender
 
 class UserBase(BaseModel):
   phone: str
+  username: str | None = None
   email: EmailStr | None = None
+  gender: Gender | None = None
   role: UserRole
 
 class UserCreate(UserBase):
@@ -20,3 +22,14 @@ class UserOut(UserBase):
 class Token(BaseModel):
   access_token: str
   token_type: str = "bearer"
+  
+class ForgotPasswordRequest(BaseModel):
+  phone: str
+
+class ForgotPasswordResponse(BaseModel):
+  message: str
+  reset_token: str | None = None
+
+class ResetPasswordRequest(BaseModel):
+  token: str
+  new_password: str = Field(..., min_length=6)

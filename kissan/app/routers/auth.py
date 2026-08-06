@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from app.db.session import get_db
-from app.schemas.user import UserOut, Token, UserCreate
+from app.schemas.user import UserOut, Token, UserCreate, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.services import auth_service
@@ -23,3 +23,13 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 @router.get("/me", response_model=UserOut)
 def read_current_user(current_user: User = Depends(get_current_user)):
   return current_user
+
+@router.post("/forgot-password", response_model=ForgotPasswordResponse)
+def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
+  user, token = auth_service.forgot_password(db, body.phone)
+  return ForgotPasswordResponse(message = "The password reset link generated successfully", reset_token=token)
+
+@router.post("/reset-password")
+def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
+  auth_service.reset_password(db, body.token, body.new_password)
+  return {"message": "Password has been reset successfully. Please login with your new password."}
