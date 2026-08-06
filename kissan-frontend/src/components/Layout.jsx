@@ -3,9 +3,13 @@ import { motion } from "framer-motion";
 import { useLanguage } from "../context/LanguageContext";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
+import ToastContainer from "./ToastContainer";
+import { useWebSocket } from "../hooks/useWebSocket";
 
 export default function Layout() {
   const { lang, toggleLang } = useLanguage();
+  const token = localStorage.getItem("kisan_token");
+  const { connected, toasts, removeToast } = useWebSocket(token);
 
   return (
     <div className="min-h-screen bg-[#fafaf9] flex">
@@ -17,7 +21,11 @@ export default function Layout() {
           <div className="flex items-center justify-between">
             <div />
             <div className="flex items-center gap-3">
-             
+              <div
+                className={`w-2 h-2 rounded-full ${connected ? "bg-green-500" : "bg-red-400"} shadow-sm`}
+                title={connected ? "Live notifications connected" : "Notifications disconnected"}
+              />
+
               <button
                 onClick={toggleLang}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-stone-200 hover:border-green-500 hover:bg-green-50 transition-all"
@@ -48,6 +56,8 @@ export default function Layout() {
 
         <Footer />
       </div>
+
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

@@ -4,7 +4,7 @@ from app.db.session import get_db
 from jose import JWTError, jwt
 from app.repositories import user_repository
 from app.core.config import settings
-from app.notifications.service import notify_user
+from app.websocket.manager import manager
 
 router = APIRouter()
 
@@ -21,9 +21,9 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), db: 
     await websocket.close(code=4401)
     return
 
-  await notify_user.connect(user.id, websocket)
+  await manager.connect(user.id, websocket)
   try:
     while True:
       await websocket.receive_text()
   except WebSocketDisconnect:
-    notify_user.disconnect(user.id, websocket)
+   manager.disconnect(user.id, websocket)

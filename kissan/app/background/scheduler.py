@@ -22,8 +22,8 @@ def check_overdue_advances():
      )
     for advance in overdue:
       logger.warning(f"CropAdvance {advance.id} is overdue (due {advance.due_date})")
-      notify_user.notify(advance.farmer_id, "advance_overdue", {"advance_id": advance.id})
-      notify_user.notify(advance.broker_id, "advance_overdue", {"advance_id": advance.id, "farmer_id": advance.farmer_id})
+      notify_user(advance.farmer_id, "advance_overdue", {"advance_id": advance.id})
+      notify_user(advance.broker_id, "advance_overdue", {"advance_id": advance.id, "farmer_id": advance.farmer_id})
   finally:
     db.close()
 
@@ -42,7 +42,7 @@ def check_unmet_contract_demands():
       allocated = contract_repository.get_allocated_qty(db, demand.id)
       if allocated < demand.quantity_needed:
         logger.warning(f"ContractDemand {demand.id} nears delivery window, {allocated}/{demand.quantity_needed} allocated")
-        manager.notify(demand.factory_id, "contract_demand_unmet", {"demand_id": demand.id, "allocated": allocated, "needed": demand.quantity_needed})
+        notify_user(db, demand.factory_id, "contract_demand_unmet", {"demand_id": demand.id, "allocated": allocated, "needed": demand.quantity_needed})
   finally:
     db.close()
 
