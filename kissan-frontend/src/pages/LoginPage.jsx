@@ -2,13 +2,13 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import {
-  Smartphone, Lock, Eye, EyeOff, Sprout, ShieldCheck,
-  Landmark, CheckCircle2, AlertTriangle, ArrowRight
+import {Smartphone, Lock, Eye, EyeOff, Sprout, ShieldCheck, Landmark, CheckCircle2, AlertTriangle, ArrowRight
 } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -38,17 +38,14 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 lg:p-8 overflow-hidden">
-      {/* Background image — replace URL with your own: /farm-bg.jpg */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
         style={{
           backgroundImage: 'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80")'
         }}
       />
-      {/* Dark overlay */}
       <div className="absolute inset-0 bg-[#0a1f16]/88" />
 
-      {/* Subtle animated ambient glow */}
       <motion.div
         className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-green-500/10 rounded-full blur-[120px]"
         animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.25, 0.1] }}
@@ -61,7 +58,7 @@ export default function LoginPage() {
       />
 
       <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-8 lg:gap-16 items-center relative z-10">
-        {/* Left: Brand */}
+
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -99,7 +96,6 @@ export default function LoginPage() {
           </div>
         </motion.div>
 
-        {/* Right: Card */}
         <motion.div
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
@@ -111,7 +107,7 @@ export default function LoginPage() {
 
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold text-stone-800">Welcome back</h2>
-              <p className="text-stone-400 text-sm mt-1">Login to your Kisan account</p>
+              <p className="text-stone-400 text-sm mt-1">{t.welcomeBack}</p>
             </div>
 
             {error && (
@@ -127,7 +123,7 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                <label className="block text-sm font-semibold text-stone-700 mb-1.5">Phone Number</label>
+                <label className="block text-sm font-semibold text-stone-700 mb-1.5">{t.phone}</label>
                 <div className="relative group">
                   <Smartphone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-green-600 transition-colors" />
                   <input
@@ -141,7 +137,7 @@ export default function LoginPage() {
               </motion.div>
 
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
-                <label className="block text-sm font-semibold text-stone-700 mb-1.5">Password</label>
+                <label className="block text-sm font-semibold text-stone-700 mb-1.5">{t.password}</label>
                 <div className="relative group">
                   <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-green-600 transition-colors" />
                   <input
@@ -152,6 +148,16 @@ export default function LoginPage() {
                     placeholder="Enter your password"
                     className="w-full pl-10 pr-11 py-2.5 bg-stone-50 border border-stone-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all text-stone-800 placeholder:text-stone-400 text-sm"
                   />
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-xs text-stone-500">
+                      <input type="checkbox" className="rounded border-stone-300 text-green-600 focus:ring-green-500" />
+                    Remember me
+                    </label>
+                    <Link to="/forgot-password" className="text-xs text-green-700 hover:text-green-800 font-medium hover:underline">
+                      {t.forgotPassword}
+                    </Link>
+                  </div>
+
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
@@ -185,9 +191,9 @@ export default function LoginPage() {
 
             <div className="mt-6 pt-5 border-t border-stone-100 text-center">
               <p className="text-sm text-stone-500">
-                Don't have an account?{" "}
+                {t.noAccount}{" "}
                 <Link to="/register" className="text-green-700 font-semibold hover:text-green-800 hover:underline transition-colors">
-                  Create account
+                  {t.createAccount}
                 </Link>
               </p>
             </div>

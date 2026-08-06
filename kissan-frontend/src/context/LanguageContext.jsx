@@ -1,0 +1,230 @@
+import { createContext, useContext, useState, useEffect } from "react";
+
+const translations = {
+  en: {
+    dashboard: "Dashboard",
+    orderInputs: "Order Inputs",
+    myAdvances: "My Advances",
+    contracts: "Contracts",
+    myListings: "My Listings",
+    ledger: "Ledger",
+    myCatalog: "My Catalog",
+    orders: "Orders",
+    advances: "Advances",
+    buyListings: "Buy Listings",
+    createListing: "Create Listing",
+    myDemands: "My Demands",
+    shopProduce: "Shop Produce",
+    myOrders: "My Orders",
+    verifyDocs: "Verify Documents",
+    signOut: "Sign out",
+    tagline: "Farm Credit & Market",
+
+    welcomeBack: "Welcome back",
+    loginSubtitle: "Login to your Kisan account",
+    phone: "Phone Number",
+    password: "Password",
+    login: "Login",
+    noAccount: "Don't have an account?",
+    createAccount: "Create account",
+    registerTitle: "Create Account",
+    registerSubtitle: "Join Kisan— Farm Credit & Market Access",
+    emailOptional: "Email (optional)",
+    selectRole: "Select Role",
+    farmer: "Farmer",
+    shopkeeper: "Shopkeeper",
+    broker: "Broker",
+    factory: "Factory",
+    consumer: "Consumer",
+    alreadyHaveAccount: "Already have an account?",
+    forgotPassword: "Forgot password?",
+    resetPassword: "Reset Password",
+    resetSubtitle: "Enter your phone number and we'll send you a reset link",
+    sendResetLink: "Send Reset Link",
+    backToLogin: "Back to login",
+    username: "Username",
+    gender: "Gender",
+    male: "Male",
+    female: "Female",
+    other: "Other",
+
+    quickActions: "Quick Actions",
+    activeAdvances: "Active Advances",
+    inProgress: "In progress",
+    pendingOrders: "Pending Orders",
+    toFulfill: "To fulfill",
+    creditOrders: "Credit Orders",
+    outstanding: "Outstanding",
+    balance: "Balance",
+    fromLedger: "From ledger",
+    listings: "Listings",
+    activeCrops: "Active crops",
+    products: "Products",
+    inCatalog: "In catalog",
+    commission: "Commission",
+    thisSeason: "This season",
+    openDemands: "Open Demands",
+    acceptingApps: "Accepting applications",
+    pendingDelivery: "Pending Delivery",
+    approvedAllocs: "Approved allocations",
+    totalProcured: "Total Procured",
+    procuredSeason: "This season",
+
+    orderInputsDesc: "Buy seed, fertilizer, pesticide on cash or credit",
+    viewAdvancesDesc: "Accept or track crop advances from brokers",
+    applyContractsDesc: "Secure buyers before harvest",
+    manageCatalogDesc: "Add or update your product listings",
+    viewOrdersDesc: "Check pending farmer orders",
+    offerAdvanceDesc: "Create a new crop advance for a farmer",
+    browseListingsDesc: "Buy crops directly from farmers",
+    postDemandDesc: "Create a contract for crop supply",
+    buyMarketDesc: "Purchase available crop listings",
+    shopProduceDesc: "Buy fresh crops directly from farms",
+
+    footerTagline: "Digitizing the arthi relationship with the transparency a bank statement gives you.",
+    footerRights: "All rights reserved.",
+    footerContact: "Contact",
+    footerPrivacy: "Privacy Policy",
+    footerTerms: "Terms of Service",
+    footerPlatform: "Platform",
+
+    save: "Save",
+    cancel: "Cancel",
+    submit: "Submit",
+    loading: "Loading...",
+    error: "Error",
+    success: "Success",
+    noData: "No data found",
+    pakistan: "Pakistan",
+  },
+  ur: {
+    dashboard: "ڈیش بورڈ",
+    orderInputs: "ان پٹس کا آرڈر",
+    myAdvances: "میرے ایڈوانسز",
+    contracts: "معاہدے",
+    myListings: "میری فہرستیں",
+    ledger: "لیجر",
+    myCatalog: "میرا کیٹلاگ",
+    orders: "آرڈرز",
+    advances: "ایڈوانسز",
+    buyListings: "فہرستیں خریدیں",
+    createListing: "فہرست بنائیں",
+    myDemands: "میری ڈیمانڈز",
+    shopProduce: "پیداوار خریدیں",
+    myOrders: "میرے آرڈرز",
+    verifyDocs: "دستاویزات تصدیق کریں",
+    signOut: "سائن آؤٹ",
+    tagline: "فارم کریڈٹ اور مارکیٹ",
+
+    welcomeBack: "خوش آمدید",
+    loginSubtitle: "اپنے Kisan اکاؤنٹ میں لاگ ان کریں",
+    phone: "فون نمبر",
+    password: "پاس ورڈ",
+    login: "لاگ ان",
+    noAccount: "اکاؤنٹ نہیں ہے؟",
+    createAccount: "اکاؤنٹ بنائیں",
+    registerTitle: "اکاؤنٹ بنائیں",
+    registerSubtitle: "Kisan میں شامل ہوں — فارم کریڈٹ اور مارکیٹ رسائی",
+    emailOptional: "ای میل (اختیاری)",
+    selectRole: "کردار منتخب کریں",
+    farmer: "کسان",
+    shopkeeper: "دکاندار",
+    broker: "بروکر",
+    factory: "فیکٹری",
+    consumer: "صارف",
+    alreadyHaveAccount: "پہلے سے اکاؤنٹ ہے؟",
+    forgotPassword: "پاس ورڈ بھول گئے؟",
+    resetPassword: "پاس ورڈ ری سیٹ",
+    resetSubtitle: "اپنا فون نمبر درج کریں اور ہم آپ کو ری سیٹ لنک بھیجیں گے",
+    sendResetLink: "ری سیٹ لنک بھیجیں",
+    backToLogin: "لاگ ان پر واپس جائیں",
+    resetNote: "پاس ورڈ ری سیٹ کے لیے بیک اینڈ اینڈ پوائنٹ درکار ہے — یو آئی تیار ہے",
+    username: "صارف نام",
+    gender: "جنس",
+    male: "مرد",
+    female: "عورت",
+    other: "دیگر",
+
+    quickActions: "فوری اقدامات",
+    activeAdvances: "فعال ایڈوانسز",
+    inProgress: "جاری",
+    pendingOrders: "زیر التواء آرڈرز",
+    toFulfill: "پورا کرنے کے لیے",
+    creditOrders: "کریڈٹ آرڈرز",
+    outstanding: "باقی",
+    balance: "بیلنس",
+    fromLedger: "لیجر سے",
+    listings: "فہرستیں",
+    activeCrops: "فعال فصلیں",
+    products: "مصنوعات",
+    inCatalog: "کیٹلاگ میں",
+    commission: "کمیشن",
+    thisSeason: "اس سیزن",
+    openDemands: "کھلی ڈیمانڈز",
+    acceptingApps: "درخواستیں قبول کر رہا ہے",
+    pendingDelivery: "زیر التواء ترسیل",
+    approvedAllocs: "منظور شدہ الاٹمنٹ",
+    totalProcured: "کل خریداری",
+    procuredSeason: "اس سیزن",
+
+    orderInputsDesc: "نقد یا کریڈٹ پر بیج، کھاد، کیڑے مار دوا خریدیں",
+    viewAdvancesDesc: "بروکرز سے فصل ایڈوانس قبول یا ٹریک کریں",
+    applyContractsDesc: "فصل سے پہلے خریداروں کو یقینی بنائیں",
+    manageCatalogDesc: "اپنی مصنوعات کی فہرستیں شامل یا اپ ڈیٹ کریں",
+    viewOrdersDesc: "زیر التواء کسانوں کے آرڈرز چیک کریں",
+    offerAdvanceDesc: "کسان کے لیے نیا فصل ایڈوانس بنائیں",
+    browseListingsDesc: "کسانوں سے براہ راست فصلیں خریدیں",
+    postDemandDesc: "فصل سپلائی کے لیے معاہدہ بنائیں",
+    buyMarketDesc: "دستیاب فصل فہرستیں خریدیں",
+    shopProduceDesc: "فارم سے تازہ فصلیں براہ راست خریدیں",
+
+    footerTagline: "بینک اسٹیٹمنٹ کی شفافیت کے ساتھ ارتھی کے تعلقات کو ڈیجیٹلائز کرنا۔",
+    footerRights: "جملہ حقوق محفوظ ہیں۔",
+    footerContact: "رابطہ",
+    footerPrivacy: "رازداری کی پالیسی",
+    footerTerms: "سروس کی شرائط",
+    footerPlatform: "پلیٹ فارم",
+
+    save: "محفوظ کریں",
+    cancel: "منسوخ کریں",
+    submit: "جمع کرائیں",
+    loading: "لوڈ ہو رہا ہے...",
+    error: "خرابی",
+    success: "کامیابی",
+    noData: "کوئی ڈیٹا نہیں ملا",
+    pakistan: "پاکستان",
+  }
+};
+
+const LanguageContext = createContext(null);
+
+export function LanguageProvider({ children }) {
+  const [lang, setLang] = useState(() => localStorage.getItem("kisan_lang") || "en");
+
+  useEffect(() => {
+    localStorage.setItem("kisan_lang", lang);
+    document.documentElement.dir = lang === "ur" ? "rtl" : "ltr";
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  const toggleLang = () => setLang(prev => prev === "en" ? "ur" : "en");
+
+  const value = {
+    lang,
+    t: translations[lang],
+    toggleLang,
+    isUrdu: lang === "ur",
+  };
+
+  return (
+    <LanguageContext.Provider value={value}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  const ctx = useContext(LanguageContext);
+  if (!ctx) throw new Error("useLanguage must be inside LanguageProvider");
+  return ctx;
+}
