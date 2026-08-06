@@ -54,7 +54,7 @@ def bulk_purchase(db: Session, buyer: User, listing_id: int, qty: float):
   listing = listing_repository.get_listing_by_id(db, listing_id)
   if not listing:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = "listing is not present")
-  amount = _apply_sale(db, listing, qty)
+  amount = _apply_sale(db, listing, qty, buyer.id)
   listing_repository.save_listing(db, listing)  
   return listing, amount
 

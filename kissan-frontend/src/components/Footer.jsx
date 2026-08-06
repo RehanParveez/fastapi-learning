@@ -47,7 +47,7 @@ export default function Footer() {
                 <Phone size={14} className="text-green-600" /> 0800-KISAN-01
               </li>
               <li className="flex items-center gap-2">
-                <Mail size={14} className="text-green-600" /> support@kisanlink.pk
+                <Mail size={14} className="text-green-600" /> support@kisan.pk
               </li>
               <li className="flex items-center gap-2">
                 <MapPin size={14} className="text-green-600" /> Lahore, Punjab, Pakistan

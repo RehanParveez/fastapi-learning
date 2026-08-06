@@ -18,82 +18,68 @@ import ConsumerOrdersPage from "../pages/ConsumerOrdersPage";
 import RecordPage from "../pages/RecordPage";
 import RatingsPage from "../pages/RatingsPage";
 import AdminDocsPage from "../pages/AdminDocsPage";
+import VerificationUploadPage from "../pages/VerificationUploadPage";
 
 export default function AppRouter() {
   const location = useLocation();
 
-   return (
-    <Routes location={location} key={location.pathname}>
-      <Route path="/login" element={<PageTransition><LoginPage /></PageTransition>} />
-      <Route path="/register" element={<PageTransition><RegisterPage /></PageTransition>} />
-      <Route path="/forgot-password" element={<PageTransition><ForgotPasswordPage /></PageTransition>} />
+    return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route path="/" element={<PageTransition><Dashboard /></PageTransition>} />
-        <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
-        <Route path="/profile/create" element={<PageTransition><ProfileCreatePage /></PageTransition>} />
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile/create" element={<ProfileCreatePage />} />
 
         <Route path="/input-orders" element={
-          <RoleRoute allowedRoles={["farmer", "shopkeeper"]}>
-            <PageTransition><InputOrdersPage /></PageTransition>
-          </RoleRoute>
+          <RoleRoute allowedRoles={["farmer", "shopkeeper"]}><InputOrdersPage /></RoleRoute>
         } />
+        <Route path="/input-catalog" element={
+          <RoleRoute allowedRoles={["shopkeeper"]}><InputCatalogPage /></RoleRoute>
+        } />
+
         <Route path="/advances" element={
-          <RoleRoute allowedRoles={["farmer"]}>
-            <PageTransition><AdvancesPage /></PageTransition>
-          </RoleRoute>
+          <RoleRoute allowedRoles={["farmer"]}><AdvancesPage /></RoleRoute>
         } />
+        <Route path="/advances/manage" element={
+          <RoleRoute allowedRoles={["broker"]}><AdvancesPage manage /></RoleRoute>
+        } />
+
         <Route path="/contracts" element={
-          <RoleRoute allowedRoles={["farmer"]}>
-            <PageTransition><ContractsPage /></PageTransition>
-          </RoleRoute>
+          <RoleRoute allowedRoles={["farmer"]}><ContractsPage /></RoleRoute>
+        } />
+        <Route path="/contracts/manage" element={
+          <RoleRoute allowedRoles={["factory"]}><ContractsPage manage /></RoleRoute>
+        } />
+
+        <Route path="/listings" element={
+          <RoleRoute allowedRoles={["broker", "factory", "consumer"]}><ListingsPage /></RoleRoute>
         } />
         <Route path="/my-listings" element={
-          <RoleRoute allowedRoles={["farmer", "broker"]}>
-            <PageTransition><MyListingsPage /></PageTransition>
-          </RoleRoute>
-        } />
-        <Route path="/ledger" element={
-          <RoleRoute allowedRoles={["farmer"]}>
-            <PageTransition><RecordPage /></PageTransition>
-          </RoleRoute>
-        } />
-
-        <Route path="/input-catalog" element={
-          <RoleRoute allowedRoles={["shopkeeper"]}>
-            <PageTransition><InputCatalogPage /></PageTransition>
-          </RoleRoute>
-        } />
-
-        <Route path="/advances/manage" element={
-          <RoleRoute allowedRoles={["broker"]}>
-            <PageTransition><AdvancesPage manage /></PageTransition>
-          </RoleRoute>
-        } />
-        <Route path="/listings" element={
-          <RoleRoute allowedRoles={["broker", "factory", "consumer"]}>
-            <PageTransition><ListingsPage /></PageTransition>
-          </RoleRoute>
-        } />
-
-        <Route path="/contracts/manage" element={
-          <RoleRoute allowedRoles={["factory"]}>
-            <PageTransition><ContractsPage manage /></PageTransition>
-          </RoleRoute>
+          <RoleRoute allowedRoles={["farmer", "broker"]}><MyListingsPage /></RoleRoute>
         } />
 
         <Route path="/consumer-orders" element={
-          <RoleRoute allowedRoles={["consumer"]}>
-            <PageTransition><ConsumerOrdersPage /></PageTransition>
+          <RoleRoute allowedRoles={["consumer"]}><ConsumerOrdersPage /></RoleRoute>
+        } />
+
+        <Route path="/ledger" element={
+          <RoleRoute allowedRoles={["farmer"]}><RecordPage /></RoleRoute>
+        } />
+
+        <Route path="/ratings/:userId" element={<RatingsPage />} />
+
+        <Route path="/verification" element={
+          <RoleRoute allowedRoles={["farmer", "shopkeeper", "broker", "factory"]}>
+            <VerificationUploadPage />
           </RoleRoute>
         } />
 
-        <Route path="/ratings/:userId" element={<PageTransition><RatingsPage /></PageTransition>} />
-
         <Route path="/admin/verification" element={
-          <RoleRoute allowedRoles={["admin"]}>
-            <PageTransition><AdminDocsPage /></PageTransition>
-          </RoleRoute>
+          <RoleRoute allowedRoles={["admin"]}><AdminDocsPage /></RoleRoute>
         } />
       </Route>
     </Routes>

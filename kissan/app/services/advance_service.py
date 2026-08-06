@@ -20,6 +20,7 @@ def _validate_offer(offer_in: CropAdvanceOffer) -> None:
         detail = "unconditional_credit advances require interest_rate")
 
 def offer_advance(db: Session, broker: User, offer_in: CropAdvanceOffer):
+  _validate_offer(offer_in)
   return advance_repository.create_advance(db, broker_id=broker.id, farmer_id=offer_in.farmer_id, advance_type=offer_in.advance_type, 
     crop_type=offer_in.crop_type, expected_qty=offer_in.expected_qty, advance_amount=offer_in.advance_amount, interest_rate=offer_in.interest_rate,
     commission_rate=offer_in.commission_rate, pricing_mode=offer_in.pricing_mode, due_date=offer_in.due_date)
@@ -55,5 +56,5 @@ def disburse_advance(db: Session, broker: User, advance_id: int):
     direction=RecordDirection.credit, amount=advance.advance_amount, reference_type = "crop_advance", reference_id=advance.id)
 
   result = advance_repository.save(db, advance)
-  notify_user.notify(advance.farmer_id, "advance_disbursed", {"advance_id": advance.id, "amount": advance.advance_amount})
+  notify_user(db, advance.farmer_id, "advance_disbursed", {"advance_id": advance.id, "amount": advance.advance_amount})
   return result
