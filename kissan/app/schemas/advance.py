@@ -44,3 +44,25 @@ class AdvanceSettleResult(BaseModel):
 
 class AdvanceRepayRequest(BaseModel):
   amount: float
+  
+class InputCreditDeductionPreview(BaseModel):
+  order_id: int
+  shopkeeper_id: int
+  total_amount: float
+  outstanding_balance: float
+  deducted: float
+  remaining_after: float
+
+class SettlementPreviewRequest(BaseModel):
+  sale_amount: float
+
+class SettlementPreviewOut(BaseModel):
+  sale_amount: float
+  commission_rate: float
+  commission_amount: float
+  advance_repayment: float
+  advance_remaining_balance: float
+  advance_status_after: AdvanceStatus
+  input_credit_deductions: list[InputCreditDeductionPreview]
+  total_input_credit_deducted: float
+  net_to_farmer: float

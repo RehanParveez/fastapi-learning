@@ -8,6 +8,7 @@ class InputProductCreate(BaseModel):
   stock_qty: float = 0
 
 class InputProductUpdate(BaseModel):
+  name: str | None = None
   unit_price: float | None = None
   stock_qty: float | None = None
 

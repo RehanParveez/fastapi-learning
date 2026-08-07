@@ -6,7 +6,7 @@ from app.services import advance_service, settlement_service
 from app.db.session import get_db
 from app.deps import require_role, get_current_user
 from app.repositories import advance_repository
-from app.schemas.advance import AdvanceSettleResult, AdvanceSettleRequest, AdvanceRepayRequest
+from app.schemas.advance import AdvanceSettleResult, AdvanceSettleRequest, AdvanceRepayRequest, SettlementPreviewRequest, SettlementPreviewOut
 
 router = APIRouter(prefix="/advances", tags=["advances"])
 
@@ -36,6 +36,11 @@ def list_my_advances(db: Session = Depends(get_db), current_user: User = Depends
 def settle_advance(advance_id: int, settle_in: AdvanceSettleRequest,
   db: Session = Depends(get_db), broker: User = Depends(require_role(UserRole.broker))):
   return settlement_service.settle_consignment_sale(db, broker, advance_id, settle_in.sale_amount)
+
+@router.post("/{advance_id}/preview-settlement", response_model=SettlementPreviewOut)
+def preview_settlement(advance_id: int, preview_in: SettlementPreviewRequest,
+  db: Session = Depends(get_db), broker: User = Depends(require_role(UserRole.broker))):
+  return settlement_service.preview_settlement(db, broker, advance_id, preview_in.sale_amount)
 
 @router.post("/{advance_id}/repay", response_model=CropAdvanceOut)
 def repay_advance(advance_id: int, repay_in: AdvanceRepayRequest,

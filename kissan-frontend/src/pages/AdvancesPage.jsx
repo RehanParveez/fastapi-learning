@@ -3,8 +3,9 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
+import SettlementPreviewModal from "../components/SettlementPreviewModal";
 import {Banknote, CheckCircle2, Clock, AlertTriangle, TrendingUp, ChevronDown, ChevronUp, Sprout, DollarSign, Percent, Calendar,
-  ArrowRight, Loader2, X
+  ArrowRight, Loader2, X, Calculator
 } from "lucide-react";
 
 export default function AdvancesPage({ manage = false }) {
@@ -23,6 +24,9 @@ export default function AdvancesPage({ manage = false }) {
 
   const [settleForm, setSettleForm] = useState({ sale_amount: "" });
   const [repayForm, setRepayForm] = useState({ amount: "" });
+  const [previewModal, setPreviewModal] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   useEffect(() => {
     loadAdvances();
@@ -90,17 +94,42 @@ export default function AdvancesPage({ manage = false }) {
     }
   }
 
-  async function handleSettle(advanceId) {
-    setError(""); setSuccess("");
-    try {
-      await api.post(`/advances/${advanceId}/settle`, { sale_amount: parseFloat(settleForm.sale_amount) });
-      setSuccess("Settlement recorded");
-      setSettleForm({ sale_amount: "" });
-      loadAdvances();
-    } catch (err) {
-      setError(err.message);
-    }
+  async function handlePreviewSettle(advanceId) {
+  const amount = parseFloat(settleForm.sale_amount);
+  if (!amount || amount <= 0) {
+    setError("Enter a valid sale amount");
+    return;
   }
+  setPreviewLoading(true);
+  setError("");
+  try {
+    const data = await api.post(`/advances/${advanceId}/preview-settlement`, { sale_amount: amount });
+    setPreviewModal({ advanceId, data });
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setPreviewLoading(false);
+  }
+}
+
+async function handleConfirmSettle() {
+  if (!previewModal) return;
+  setConfirmLoading(true);
+  setError("");
+  try {
+    await api.post(`/advances/${previewModal.advanceId}/settle`, {
+      sale_amount: parseFloat(settleForm.sale_amount),
+    });
+    setSuccess("Settlement recorded successfully");
+    setPreviewModal(null);
+    setSettleForm({ sale_amount: "" });
+    loadAdvances();
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setConfirmLoading(false);
+  }
+}
 
   async function handleRepay(advanceId) {
     setError(""); setSuccess("");
@@ -293,13 +322,25 @@ export default function AdvancesPage({ manage = false }) {
                           </button>
                         )}
                         {isBroker && adv.status === "disbursed" && adv.advance_type === "crop_consignment" && (
-                          <div className="flex items-center gap-2">
-                            <input type="number" min="0" step="0.01" placeholder="Sale amount" value={settleForm.sale_amount} onChange={e => setSettleForm({ sale_amount: e.target.value })}
-                              className="border border-stone-300 rounded-lg px-3 py-2 text-sm w-32 focus:ring-2 focus:ring-green-500 outline-none" />
-                            <button onClick={() => handleSettle(adv.id)} className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-                              Settle
-                            </button>
-                          </div>
+                         <div className="flex items-center gap-2 mt-2">
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="Sale amount (Rs)"
+                            value={settleForm.sale_amount}
+                            onChange={(e) => setSettleForm({ sale_amount: e.target.value })}
+                            className="border border-stone-300 rounded-lg px-3 py-2 text-sm w-40 focus:ring-2 focus:ring-green-500 outline-none"
+                          />
+                          <button
+                            onClick={() => handlePreviewSettle(adv.id)}
+                            disabled={previewLoading}
+                            className="bg-green-700 hover:bg-green-800 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5"
+                          >
+                           <Calculator size={14} />
+                           {previewLoading ? "Calculating..." : "Preview Settlement"}
+                          </button>
+                         </div>
                         )}
                         {isBroker && adv.status === "disbursed" && adv.advance_type === "unconditional_credit" && (
                           <div className="flex items-center gap-2">
@@ -319,6 +360,12 @@ export default function AdvancesPage({ manage = false }) {
           </div>
         )}
       </div>
+      <SettlementPreviewModal
+        preview={previewModal?.data}
+        onConfirm={handleConfirmSettle}
+        onCancel={() => setPreviewModal(null)}
+        loading={confirmLoading}
+      />
     </div>
   );
 }

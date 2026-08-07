@@ -22,8 +22,8 @@ def check_overdue_advances():
      )
     for advance in overdue:
       logger.warning(f"CropAdvance {advance.id} is overdue (due {advance.due_date})")
-      notify_user(advance.farmer_id, "advance_overdue", {"advance_id": advance.id})
-      notify_user(advance.broker_id, "advance_overdue", {"advance_id": advance.id, "farmer_id": advance.farmer_id})
+      notify_user(db, advance.farmer_id, "advance_overdue", {"advance_id": advance.id})
+      notify_user(db, advance.broker_id, "advance_overdue", {"advance_id": advance.id, "farmer_id": advance.farmer_id})
   finally:
     db.close()
 

@@ -4,10 +4,10 @@ from fastapi import FastAPI
 from app.models.user import User, FarmerProfile, ShopkeeperProfile, BrokerProfile, FactoryProfile
 from app.core.security import hash_password, verify_password, create_access_token
 from app.routers import auth, profiles, verification, inputs,  input_orders, advances, record, contracts, listings, ratings, websocket as ws_router, admin
-from app.websocket.manager import manager
 from app.notifications.service import notify_user
 from app.background.scheduler import start_scheduler, shutdown_scheduler
 from fastapi.middleware.cors import CORSMiddleware
+from app.websocket.manager import manager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

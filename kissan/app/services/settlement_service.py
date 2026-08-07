@@ -13,6 +13,47 @@ def farmer_balance(db: Session, farmer_id: int) -> float:
     total += entry.amount if entry.direction == RecordDirection.credit else -entry.amount
   return total
 
+def preview_settlement(db: Session, broker: User, advance_id: int, sale_amount: float) -> dict:
+  advance = advance_repository.get_advance_by_id(db, advance_id)
+  if not advance:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = "advance is not present")
+  if advance.broker_id != broker.id:
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail = "you did not offer this advance")
+  if advance.advance_type != AdvanceType.crop_consignment:
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+      detail = "only crop_consignment advances settle from a sale — unconditional_credit is repaid directly")
+  if advance.status not in (AdvanceStatus.disbursed, AdvanceStatus.repaying):
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+      detail=f"cant settle an advance in '{advance.status.value}' status")
+  if sale_amount <= 0:
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail = "sale amount must be positive")
+
+  remaining = sale_amount
+    
+  commission = round(sale_amount * advance.commission_rate, 2)
+  remaining -= commission
+  principal_take = min(remaining, advance.outstanding_balance)
+  remaining_after_advance = remaining - principal_take
+  new_balance = advance.outstanding_balance - principal_take
+  status_after = AdvanceStatus.settled if new_balance <= 0 else AdvanceStatus.repaying
+
+  input_credits = []
+  total_input_deducted = 0.0
+  for credit in input_order_repository.open_input_credits(db, advance.farmer_id):
+    take = min(remaining_after_advance, credit.outstanding_balance)
+    if take <= 0:
+      continue
+    input_credits.append({"order_id": credit.id, "shopkeeper_id": credit.shopkeeper_id, "total_amount": credit.total_amount,
+      "outstanding_balance": credit.outstanding_balance, "deducted": round(take, 2), "remaining_after": round(credit.outstanding_balance - take, 2),
+    })
+    remaining_after_advance -= take
+    total_input_deducted += take
+
+  return {"sale_amount": sale_amount, "commission_rate": advance.commission_rate, "commission_amount": commission,
+    "advance_repayment": principal_take, "advance_remaining_balance": round(new_balance, 2), "advance_status_after": status_after, "input_credit_deductions": input_credits,
+      "total_input_credit_deducted": round(total_input_deducted, 2), "net_to_farmer": round(remaining_after_advance, 2),
+    }
+
 def settle_consignment_sale(db: Session, broker: User, advance_id: int, sale_amount: float) -> dict:
   advance = advance_repository.get_advance_by_id(db, advance_id)
   if not advance:
