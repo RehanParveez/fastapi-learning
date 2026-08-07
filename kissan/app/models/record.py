@@ -14,7 +14,7 @@ class RecordEntryType(str, enum.Enum):
   advance_repayment = "advance_repayment"
   broker_commission = "broker_commission"
   net_payment = "net_payment"
-  contract_payment = "contract_payment",
+  contract_payment = "contract_payment"
   crop_sale = "crop_sale"
   
 class RecordEntry(Base):
