@@ -33,3 +33,15 @@ def set_profile_verified(db: Session, role_value: str, profile_id: int, verified
     db.commit()
     db.refresh(profile)
   return profile
+
+def update_profile(db: Session, role_value: str, user_id: int, **fields):
+  model = get_profile_model(role_value)
+  profile = db.query(model).filter(model.user_id == user_id).first()
+  if not profile:
+    return None
+  for key, value in fields.items():
+    if value is not None:
+      setattr(profile, key, value)
+  db.commit()
+  db.refresh(profile)
+  return profile

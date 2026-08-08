@@ -195,6 +195,27 @@ const translations = {
     success: "کامیابی",
     noData: "کوئی ڈیٹا نہیں ملا",
     pakistan: "پاکستان",
+
+    creditOutstanding: "باقی کریڈٹ",
+    settledCredits: "سیٹل شدہ کریڈٹز",
+    repaymentAmount: "ادائیگی کی رقم",
+    recordRepayment: "ادائیگی ریکارڈ کریں",
+    saleAmount: "فروخت کی رقم",
+    previewSettlement: "سیٹلمنٹ دیکھیں",
+    confirmSettlement: "سیٹلمنٹ تصدیق کریں",
+    commission: "کمیشن",
+    advanceRepayment: "ایڈوانس واپسی",
+    inputCreditDeductions: "ان پٹ کریڈٹ کٹوتی",
+    netToFarmer: "کسان کو净 رقم",
+    markDelivered: "ترسیل شدہ نشان زد کریں",
+    myProfile: "میری پروفائل",
+    saveChanges: "تبدیلیاں محفوظ کریں",
+    businessName: "کاروباری نام",
+    landSize: "زمین کا سائز",
+    location: "مقام",
+    verifiedText: "تصدیق شدہ شناختیں",
+    financedText: "شفاف ایڈوانسز",
+    settledText: "خودکار سیٹلمنٹ",
   }
 };
 

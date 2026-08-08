@@ -157,6 +157,16 @@ export default function Dashboard() {
     factory: `${t.factory} ${t.dashboard}`, consumer: `${t.consumer} ${t.dashboard}`, admin: `Admin ${t.dashboard}`,
   };
 
+  const [adminStats, setAdminStats] = useState({});
+
+  useEffect(() => {
+   if (role === "admin") {
+    api.get("/admin/stats")
+      .then(setAdminStats)
+      .catch(() => {});
+   }
+  }, [role]);
+
   return (
     <motion.div
       variants={container}
@@ -218,9 +228,48 @@ export default function Dashboard() {
       )}
 
       {role === "admin" && (
-        <motion.div variants={container} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <StatCard title="Pending Verifications" value={stats.pendingVerifications ?? 0} subtitle="Documents to review" icon={ClipboardList} color="bg-amber-100 text-amber-700" loading={loading} />
-          <StatCard title="Total Users" value="—" subtitle="Coming soon" icon={User} color="bg-stone-100 text-stone-600" loading={loading} />
+        <motion.div
+          variants={container}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+        >
+          <StatCard
+            title="Pending Verifications"
+            value={stats.pendingVerifications ?? 0}
+            subtitle="Documents to review"
+            icon={ClipboardList}
+            color="bg-amber-100 text-amber-700"
+            loading={loading}
+          />
+
+          <StatCard
+            title="Total Users"
+            value={adminStats.total_users ?? 0}
+            subtitle="Platform-wide"
+            icon={User}
+            color="bg-blue-100 text-blue-700"
+            loading={false}
+          />
+
+          <StatCard
+            title="Active Advances"
+            value={adminStats.active_advances ?? 0}
+            subtitle="Currently disbursed"
+            icon={Banknote}
+            color="bg-green-100 text-green-700"
+            loading={false}
+          />
+
+          <StatCard
+            title="Total Orders"
+            value={
+              (adminStats.total_input_orders ?? 0) +
+              (adminStats.total_consumer_orders ?? 0)
+            }
+            subtitle="Input + Consumer"
+            icon={ShoppingCart}
+            color="bg-purple-100 text-purple-700"
+            loading={false}
+          />
         </motion.div>
       )}
 

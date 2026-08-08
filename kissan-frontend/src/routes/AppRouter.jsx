@@ -19,6 +19,8 @@ import RecordPage from "../pages/RecordPage";
 import RatingsPage from "../pages/RatingsPage";
 import AdminDocsPage from "../pages/AdminDocsPage";
 import VerificationUploadPage from "../pages/VerificationUploadPage";
+import LandingPage from "../pages/LandingPage";
+import ProfilePage from "../pages/ProfilePage";
 
 export default function AppRouter() {
   const location = useLocation();
@@ -29,10 +31,12 @@ export default function AppRouter() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
+      <Route path="/" element={<LandingPage />} />
+
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route path="/" element={<Dashboard />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile/create" element={<ProfileCreatePage />} />
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
         <Route path="/input-orders" element={
           <RoleRoute allowedRoles={["farmer", "shopkeeper"]}><InputOrdersPage /></RoleRoute>

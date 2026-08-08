@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import SettlementPreviewModal from "../components/SettlementPreviewModal";
+import RateButton from "../components/RateButton";
+import { SkeletonCard } from "../components/Skeleton";
 import {Banknote, CheckCircle2, Clock, AlertTriangle, TrendingUp, ChevronDown, ChevronUp, Sprout, DollarSign, Percent, Calendar,
   ArrowRight, Loader2, X, Calculator
 } from "lucide-react";
@@ -262,8 +264,10 @@ async function handleConfirmSettle() {
 
       <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-stone-400 flex items-center justify-center gap-2">
-            <Loader2 size={20} className="animate-spin" /> Loading advances...
+          <div className="grid gap-4 p-5">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
           </div>
         ) : advances.length === 0 ? (
           <div className="p-12 text-center text-stone-400">
@@ -351,7 +355,12 @@ async function handleConfirmSettle() {
                             </button>
                           </div>
                         )}
-                      </div>
+                      {adv.status === "settled" && (
+                        <div className="mt-3 flex gap-2">
+                          <RateButton userId={adv.broker_id} label="Rate Broker" />
+                        </div>
+                      )}
+                    </div>
                     </motion.div>
                   )}
                 </AnimatePresence>

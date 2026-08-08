@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../api/client";
 import { motion } from "framer-motion";
+import RateFarmerFromListing from "../components/RateFarmerFromListing";
 import { Package, CheckCircle2, Clock, AlertTriangle, Loader2, MapPin } from "lucide-react";
 
 export default function ConsumerOrdersPage() {
@@ -82,6 +83,15 @@ export default function ConsumerOrdersPage() {
                       </div>
                       <span className="font-medium text-stone-800">Rs {item.subtotal.toLocaleString()}</span>
                     </div>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {order.items.map((item) => (
+                    <RateFarmerFromListing
+                      key={item.listing_id}
+                      listingId={item.listing_id}
+                    />
                   ))}
                 </div>
 

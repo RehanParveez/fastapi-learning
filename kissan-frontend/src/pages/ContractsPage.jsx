@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
+import RateButton from "../components/RateButton";
 import {ClipboardList, CheckCircle2, XCircle, Truck, Sprout, AlertTriangle, ChevronDown, ChevronUp, Plus, Loader2, ArrowRight, Star
 } from "lucide-react";
 
@@ -170,8 +171,24 @@ export default function ContractsPage({ manage = false }) {
                   <span className="text-xs font-semibold text-stone-500">Demand #{alloc.demand_id}</span>
                   {statusBadge(alloc.status)}
                 </div>
-                <p className="text-sm font-medium text-stone-800">Requested: {alloc.requested_qty} units</p>
-                {alloc.allocated_qty && <p className="text-sm text-stone-600">Allocated: {alloc.allocated_qty} units</p>}
+                <p className="text-sm font-medium text-stone-800">
+                  Requested: {alloc.requested_qty} units
+                </p>
+
+                {alloc.allocated_qty && (
+                  <p className="text-sm text-stone-600">
+                    Allocated: {alloc.allocated_qty} units
+                  </p>
+                )}
+
+                {alloc.status === "delivered" && (
+                  <div className="mt-2">
+                    <RateButton
+                      userId={alloc.factory_id}
+                      label="Rate Factory"
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>

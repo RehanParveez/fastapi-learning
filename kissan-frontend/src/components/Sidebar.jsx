@@ -5,7 +5,7 @@ import { useLanguage } from "../context/LanguageContext";
 import {Home, Sprout, Banknote, ClipboardList, Wheat, BarChart3, Package, ShoppingCart, ShoppingBag, CheckCircle2, LogOut, Sprout as SproutIcon
 } from "lucide-react";
 
-export default function Sidebar() {
+export default function Sidebar({ onNavigate }) {
   const { user, role, logout } = useAuth();
   const { t, lang } = useLanguage(); 
   const location = useLocation();
@@ -78,6 +78,7 @@ export default function Sidebar() {
             <Link
               key={item.to}
               to={item.to}
+              onClick={onNavigate}
               className={`group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
                 isActive
                   ? "bg-green-700/40 text-white shadow-lg shadow-green-900/20 border border-green-600/30"

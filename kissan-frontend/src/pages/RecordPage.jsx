@@ -25,6 +25,22 @@ export default function RecordPage() {
     }
   }
 
+  const [entries, setEntries] = useState([]);
+
+  useEffect(() => {
+    loadBalance();
+    loadEntries();
+  }, []);
+
+  async function loadEntries() {
+   try {
+    const data = await api.get("/record/me/entries");
+    setEntries(data);
+   } catch (err) {
+    console.error(err);
+  }
+}
+
   const balanceColor = balance > 0 ? "text-green-700" : balance < 0 ? "text-red-600" : "text-stone-600";
   const balanceBg = balance > 0 ? "bg-green-50 border-green-200" : balance < 0 ? "bg-red-50 border-red-200" : "bg-stone-50 border-stone-200";
 
@@ -68,10 +84,49 @@ export default function RecordPage() {
 
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h3 className="text-sm font-bold text-stone-500 uppercase tracking-wider mb-3">Transaction History</h3>
-        <div className="text-center py-8 text-stone-400">
-          <p>Full ledger entries will appear here once the backend endpoint is added.</p>
-          <p className="text-xs mt-1 text-stone-300">(Backend needs: GET /record/me/entries)</p>
-        </div>
+        {entries.length === 0 ? (
+          <p className="text-center py-8 text-stone-400">
+            No transactions yet.
+          </p>
+        ) : (
+          <div className="divide-y divide-stone-100">
+            {entries.map((entry) => (
+              <div
+                key={entry.id}
+                className="py-3 flex items-center justify-between text-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      entry.direction === "credit"
+                        ? "bg-green-500"
+                        : "bg-red-500"
+                    }`}
+                  />
+                  <div>
+                    <p className="font-medium text-stone-700 capitalize">
+                      {entry.entry_type.replace(/_/g, " ")}
+                    </p>
+                    <p className="text-xs text-stone-400">
+                      {entry.reference_type} #{entry.reference_id} ·{" "}
+                      {new Date(entry.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <span
+                  className={`font-semibold ${
+                    entry.direction === "credit"
+                      ? "text-green-700"
+                      : "text-red-600"
+                  }`}
+                >
+                  {entry.direction === "credit" ? "+" : "–"} Rs{" "}
+                  {Number(entry.amount).toLocaleString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -14,3 +14,9 @@ def get_my_profile(db: Session, current_user: User):
   if not profile:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = "no profile is present for this account yet")
   return profile
+
+def update_my_profile(db: Session, current_user: User, **fields):
+  profile = profile_repository.update_profile(db, current_user.role.value, current_user.id, **fields)
+  if not profile:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = "profile is not present")
+  return profile
